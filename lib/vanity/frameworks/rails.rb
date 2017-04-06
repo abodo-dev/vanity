@@ -44,10 +44,10 @@ module Vanity
         define_method(:vanity_identity_block) { block }
         define_method(:vanity_identity_method) { method_name }
 
-        around_filter :vanity_context_filter
-        before_filter :vanity_reload_filter unless ::Rails.configuration.cache_classes
-        before_filter :vanity_query_parameter_filter
-        after_filter :vanity_track_filter
+        around_action :vanity_context_filter
+        before_action :vanity_reload_filter unless ::Rails.configuration.cache_classes
+        before_action :vanity_query_parameter_filter
+        after_action :vanity_track_filter
       end
       protected :use_vanity
     end
@@ -315,7 +315,7 @@ module Vanity
       # JS callback action used by vanity_js
       def add_participant
         if params[:v].nil?
-          render :status => 404, :nothing => true
+          render status: 404, body: nil
           return
         end
 
@@ -326,14 +326,14 @@ module Vanity
           answer = answer.to_i
 
           if !exp || !exp.alternatives[answer]
-            render :status => 404, :nothing => true
+            render status: 404, body: nil
             return
           end
           h[exp] = exp.alternatives[answer].value
         end
 
         h.each{ |e,a| e.chooses(a, request) }
-        render :status => 200, :nothing => true
+        head :ok
       end
     end
 
